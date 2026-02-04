@@ -11,5 +11,3 @@ class User(SQLModel, table=True):
     hashed_password: str
     full_name: str | None = None
     disabled: bool = False
-
-
