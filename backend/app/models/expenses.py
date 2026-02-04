@@ -11,7 +11,7 @@ class Expense(SQLModel, table=True):
     amount: float
     description: str | None
 
-    category_id: uuid.UUID = Field(foreign_key="categories.id",index=True)
+    category_id: uuid.UUID = Field(foreign_key="categories.id", index=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
 
     date: date

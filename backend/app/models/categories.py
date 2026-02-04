@@ -8,5 +8,5 @@ class Category(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id")
 
-    name: str 
+    name: str
     color: str

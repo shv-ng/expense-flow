@@ -1,7 +1,7 @@
 from datetime import date, datetime
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session,select
+from sqlmodel import Session, select
 
 from app.auth.dependencies import get_current_user
 from app.database import get_session
@@ -66,20 +66,24 @@ def get_expense(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    return session.exec(select(Expense).where(Expense.id == id,User.id == current_user.id)).first()
+    return session.exec(
+        select(Expense).where(Expense.id == id, User.id == current_user.id)
+    ).first()
 
 
 # update expenses
 @router.put("/{id}")
 def update_expense(
-    id: uuid.UUID, 
-    amount: float|None=None,
-    description: str|None=None,
-    date: date|None=None,
+    id: uuid.UUID,
+    amount: float | None = None,
+    description: str | None = None,
+    date: date | None = None,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    expense = session.exec(select(Expense).where(Expense.id == id,User.id == current_user.id)).first()
+    expense = session.exec(
+        select(Expense).where(Expense.id == id, User.id == current_user.id)
+    ).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
 
@@ -93,20 +97,22 @@ def update_expense(
     session.add(expense)
     session.commit()
     session.refresh(expense)
-    return 
+    return
+
 
 # delete expenses
 @router.delete("/{id}")
 def delete_expense(
-    id: uuid.UUID, 
+    id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    expense = session.exec(select(Expense).where(Expense.id == id,User.id == current_user.id)).first()
+    expense = session.exec(
+        select(Expense).where(Expense.id == id, User.id == current_user.id)
+    ).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
 
     session.delete(expense)
     session.commit()
     return
-
