@@ -10,8 +10,9 @@ from app.models.users import User
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+# create user
 @router.post("/register")
-async def register(
+def register(
     username: str, email: str, password: str, session: Session = Depends(get_session)
 ):
     existing = session.exec(
@@ -33,6 +34,7 @@ async def register(
     return {"id": user.id, "username": user.username}
 
 
+# login
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
