@@ -2,6 +2,8 @@
 
 A full-stack expense tracking application built with FastAPI (Python) and Svelte 5, featuring user authentication, category management, expense tracking, and analytics visualization.
 
+![Screenshot](./screenshot.png)
+
 ## Features
 
 - 🔐 **User Authentication** - Secure registration and login with JWT tokens
