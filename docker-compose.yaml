@@ -13,4 +13,10 @@ services:
       - .env
     depends_on:
       - db
-
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+      - ./frontend/.env
