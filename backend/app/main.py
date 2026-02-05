@@ -1,17 +1,22 @@
 from fastapi import FastAPI
-from .auth import routes as auth
-from .users import routes as users
-from .categories import routes as categories
-from .expenses import routes as expenses
-from .analytics import routes as analytics
+from fastapi.middleware.cors import CORSMiddleware
+
+from app import analytics, auth, categories, expenses,users
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(auth.router)
-app.include_router(users.router)
 app.include_router(categories.router)
 app.include_router(expenses.router)
 app.include_router(analytics.router)
+app.include_router(users.router)
 
 
 @app.get("/health")

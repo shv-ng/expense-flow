@@ -16,3 +16,8 @@ dependencies = [
     "python-jose>=3.5.0",
     "sqlmodel>=0.0.32",
 ]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+
+reportDeprecated = false

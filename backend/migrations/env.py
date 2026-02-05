@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from app.models import *  # noqa
-from app.core.config import settings
+from app.config import settings
 
 config = context.config
 

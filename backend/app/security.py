@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
+
 from jose import jwt
 from passlib.context import CryptContext
-from app.core.config import settings
+
+from app.config import settings
 
 ALGORITHM = "HS256"
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")

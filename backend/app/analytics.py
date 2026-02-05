@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, extract, func, select
 
-from app.auth.dependencies import get_current_user
-from app.database import get_session
+from app.db import get_session
+from app.deps import get_current_user
 from app.models import Category, Expense, User
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])

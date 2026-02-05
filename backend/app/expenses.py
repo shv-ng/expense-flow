@@ -1,11 +1,14 @@
-from datetime import date, datetime
 import uuid
+from datetime import date, datetime
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.auth.dependencies import get_current_user
-from app.database import get_session
+from app.db import get_session
+from app.deps import get_current_user
 from app.models import Category, Expense, User
+from app.schemas import CreateExpense, ExpenseRead
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
@@ -13,23 +16,22 @@ router = APIRouter(prefix="/expenses", tags=["expenses"])
 # create expenses
 @router.post("/")
 def create_expense(
-    amount: float,
-    category_id: uuid.UUID,
-    date: datetime = date.today(),
-    description: str | None = None,
+    data: CreateExpense,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
     # check if category exists
-    category = session.exec(select(Category).where(Category.id == category_id)).first()
+    category = session.exec(
+        select(Category).where(Category.id == data.category_id)
+    ).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
 
     expense = Expense(
-        amount=amount,
-        description=description,
-        date=date,
-        category_id=category_id,
+        amount=data.amount,
+        description=data.description,
+        date=data.date,
+        category_id=data.category_id,
         user_id=current_user.id,
     )
 
@@ -41,7 +43,7 @@ def create_expense(
 
 
 # get expenses with filters like date range and/or category
-@router.get("/")
+@router.get("/", response_model=list[ExpenseRead])
 def get_expenses(
     date_from: datetime | None = None,
     date_to: datetime | None = None,
@@ -49,13 +51,18 @@ def get_expenses(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    stmt = select(Expense).where(Expense.user_id == current_user.id)
+    stmt = (
+        select(Expense)
+        .where(Expense.user_id == current_user.id)
+        .options(selectinload(Expense.category))
+    )
     if date_from:
         stmt = stmt.where(Expense.date >= date_from)
     if date_to:
         stmt = stmt.where(Expense.date <= date_to)
     if category_id:
         stmt = stmt.where(Expense.category_id == category_id)
+
     return session.exec(stmt).all()
 
 
@@ -67,7 +74,7 @@ def get_expense(
     session: Session = Depends(get_session),
 ):
     return session.exec(
-        select(Expense).where(Expense.id == id, User.id == current_user.id)
+        select(Expense).where(Expense.id == id, Expense.user_id == current_user.id)
     ).first()
 
 
@@ -82,7 +89,7 @@ def update_expense(
     session: Session = Depends(get_session),
 ):
     expense = session.exec(
-        select(Expense).where(Expense.id == id, User.id == current_user.id)
+        select(Expense).where(Expense.id == id, Expense.user_id == current_user.id)
     ).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -97,7 +104,7 @@ def update_expense(
     session.add(expense)
     session.commit()
     session.refresh(expense)
-    return
+    return expense
 
 
 # delete expenses
@@ -108,7 +115,7 @@ def delete_expense(
     session: Session = Depends(get_session),
 ):
     expense = session.exec(
-        select(Expense).where(Expense.id == id, User.id == current_user.id)
+        select(Expense).where(Expense.id == id, Expense.user_id == current_user.id)
     ).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")

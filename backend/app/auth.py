@@ -2,29 +2,29 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
-from app.auth.security import create_access_token, hash_password, verify_password
-from app.database import get_session
-from app.models.users import User
-
+from app.db import get_session
+from app.models import User
+from app.schemas import RegisterRequest
+from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 # create user
 @router.post("/register")
-def register(
-    username: str, email: str, password: str, session: Session = Depends(get_session)
-):
+def register(data: RegisterRequest, session: Session = Depends(get_session)):
     existing = session.exec(
-        select(User).where((User.username == username) | (User.email == email))
+        select(User).where(
+            (User.username == data.username) | (User.email == data.email)
+        )
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
     user = User(
-        username=username,
-        email=email,
-        hashed_password=hash_password(password),
+        username=data.username,
+        email=data.email,
+        hashed_password=hash_password(data.password),
     )
 
     session.add(user)
@@ -34,7 +34,6 @@ def register(
     return {"id": user.id, "username": user.username}
 
 
-# login
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
