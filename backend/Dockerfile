@@ -26,6 +26,8 @@ RUN uv sync --frozen --no-dev
 # ---- Copy application code ----
 COPY . .
 
+RUN uv run alembic upgrade head
+
 # ---- Expose port ----
 EXPOSE 8000
 
