@@ -26,11 +26,9 @@ RUN uv sync --frozen --no-dev
 # ---- Copy application code ----
 COPY . .
 
-RUN uv run alembic upgrade head
-
 # ---- Expose port ----
 EXPOSE 8000
 
 # ---- Run app ----
-CMD ["uv", "run", "fastapi", "run" ]
+CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 
